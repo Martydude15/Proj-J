@@ -1,7 +1,7 @@
 import pandas as pd
 import numpy as np
 
-# yepperinss
+# yepperinsss
 def read_funct():
 
     maf_actions = pd.read_csv("HtM_MAF Data_Final.csv",
