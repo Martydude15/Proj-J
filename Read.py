@@ -1,7 +1,7 @@
 import pandas as pd
 import numpy as np
 
-# yepperinsss
+# Makes csv for mu and msp
 def read_funct():
 
     maf_actions = pd.read_csv("HtM_MAF Data_Final.csv",
@@ -32,7 +32,7 @@ def read_funct():
     maf_actions['Completion Date'] = pd.to_datetime(
         maf_actions['Completion Date'])
 
-    maf_actions.dtypes
+    print(maf_actions.dtypes)
 
     print(maf_actions.head())
 
@@ -50,13 +50,16 @@ def read_funct():
 
     mu_data['Fault Date'] = pd.to_datetime(
         mu_data['ZULU_Time'].str.split(" ", n=2, expand=True)[1])
-
+    
     mu_data['Fault Time'] = pd.to_datetime(mu_data['ZULU_Time'].str.split(
-        " ", n=2, expand=True)[2], format='%H:%M:%S:%f').dt.time
+        " ", n=2, expand=True)[2] , format='%H:%M:%S:%f'  ,errors='coerce').dt.time
+    
+#    mu_data['Fault Time'] = pd.to_datetime(mu_data['ZULU_Time'].str.split(
+#        " ", n=2, expand=True)[2]).strptime('%H:%M:%S:%f').dt.time
 
-    mu_data.head()
+    print(mu_data.dtypes)
 
-    mu_data.dtypes
+    print(mu_data.head())
 
     mu_data.to_csv("mu_clean.csv")
 
