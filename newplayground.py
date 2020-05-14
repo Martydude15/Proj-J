@@ -62,23 +62,6 @@ msp_data['Fault Time'] = pd.to_datetime(msp_data['ZULU_Time'].str.split(" "
 
 # ------------------------------------------
 
-#print(maf_data.count())
-#input("Enter to continue.")
-
-#print(msp_data.count())
-#input("Enter to continue.")
-
-# maf_data['Aircraft'].count()
-#print(maf_data.Aircraft.count())
-#input("Enter to continue.")
-
-#print((maf_data.Aircraft == 1).sum())
-#input("Enter to continue.")
-
-#print(maf_data.Aircraft.value_counts)
-#input("Enter to continue.")
-#print(maf_data['Aircraft'].value_counts)
-#input("Enter to continue.")
 
 sns.set(style="darkgrid")
 plt.figure(figsize=(16, 10))
@@ -95,27 +78,14 @@ corrosion_actions["action_year"] = pd.DatetimeIndex(corrosion_actions['Completio
 
 msp_data['action_year'] = pd.DatetimeIndex(msp_data['Fault Date']).year
 
-#print(msp_data.head())
-#input("Enter to continue.")
 
-#print(msp_data.head())
-#input("Enter to continue.")
-
-#print(corrosion_actions.head())
-#input("Enter to continue.")
-
-#newb_data = pd.DataFrame(columns=['Aircraft', 'action_year', 'Fault Date'])
-
-cut_corr = np.array_split(corrosion_actions , 3)
-cut_msp = np.array_split(msp_data ,3)
+cut_corr = np.array_split(corrosion_actions , 10)
+cut_msp = np.array_split(msp_data ,10)
 cut_maf = np.array_split(maf_data , 20)
 
-# for i in range(0,3):
-#     combined_data = pd.merge(cut_corr[i], cut_msp[i])
+for i in range(0,10):
+     combined_data = pd.merge(cut_corr[i], cut_msp[i])
 
-combined_data = pd.merge(cut_corr[0], cut_msp[0])
-combined_data = pd.merge(cut_corr[1], cut_msp[1])
-combined_data = pd.merge(cut_corr[2], cut_msp[2])
 
 
 
@@ -195,55 +165,59 @@ print(msp_diff.sort_values('diff', ascending=False).reset_index().head(20).plot.
 #NEW
 
 
-msp_interest = msp_diff.sort_values('diff', ascending=False).reset_index().head(20)['MSP']
+# msp_interest = msp_diff.sort_values('diff', ascending=False).reset_index().head(20)['MSP']
 
-msp_interest
+# msp_interest
 
-msp_counts[msp_counts['MSP'].isin(msp_interest)].to_csv('MSP_freq.csv', index = False)
+# msp_counts[msp_counts['MSP'].isin(msp_interest)].to_csv('MSP_freq.csv', index = False)
 
-msp_counts['row'] = msp_counts['row'].astype('category')
+# msp_counts['row'] = msp_counts['row'].astype('category')
 
+# msp_counts['row'] = msp_counts['row'].cat.add_categories(0.0)
 
+# corrosion = msp_counts[msp_counts['MSP'].isin(msp_interest)].query('Pre').drop('Pre', axis = 1).pivot(index = 'Job Code', columns = 'MSP', values = 'row').fillna(0.0)
 
-corrosion = msp_counts[msp_counts['MSP'].isin(msp_interest)].query('Pre').drop('Pre', axis = 1).pivot(index = 'Job Code', columns = 'MSP', values = 'row').reset_index()
+# corrosion.reset_index()
 
-corrosion['corrosion'] = True
+# corrosion['corrosion'] = True
 
-corrosion.drop('Job Code', axis = 1, inplace = True)
+# print(corrosion.info)
 
-corrosion.head()
+# #corrosion.drop('Job Code',inplace = True)
 
-non_corrosion_actions = maf_data[~(maf_data['Corrosion'] | maf_data['Bare Metal'] | maf_data['Corrosion Prevention Treatment'])].sample(60000, axis = 0, random_state = 35)
+# corrosion.head()
 
-non_corrosion_actions["action_month"] = pd.DatetimeIndex(non_corrosion_actions['Completion Date']).month
+# non_corrosion_actions = maf_data[~(maf_data['Corrosion'] | maf_data['Bare Metal'] | maf_data['Corrosion Prevention Treatment'])].sample(60000, axis = 0, random_state = 35)
 
-non_corrosion_actions["action_year"] = pd.DatetimeIndex(non_corrosion_actions['Completion Date']).year
+# non_corrosion_actions["action_month"] = pd.DatetimeIndex(non_corrosion_actions['Completion Date']).month
 
-combined_data_non = non_corrosion_actions.merge(msp_data[['Aircraft', 'action_year', 'MSP', 'Flight_Mode', 'Fault Date']], how = 'left', on = ['Aircraft', 'action_year'])
+# non_corrosion_actions["action_year"] = pd.DatetimeIndex(non_corrosion_actions['Completion Date']).year
 
-combined_data_non['before_window'] = combined_data_non['Completion Date'] - pd.DateOffset(months = 1)
+# combined_data_non = non_corrosion_actions.merge(msp_data[['Aircraft', 'action_year', 'MSP', 'Flight_Mode', 'Fault Date']], how = 'left', on = ['Aircraft', 'action_year'])
 
-combined_data_non['after_window'] = combined_data_non['Completion Date'] + pd.DateOffset(months = 1)
+# combined_data_non['before_window'] = combined_data_non['Completion Date'] - pd.DateOffset(months = 1)
 
-combined_data_non = combined_data_non[(combined_data_non['Fault Date'] > combined_data_non['before_window']) & (combined_data_non['Fault Date'] < combined_data_non['after_window'])]
+# combined_data_non['after_window'] = combined_data_non['Completion Date'] + pd.DateOffset(months = 1)
 
-combined_data_non['Pre'] = combined_data_non['Fault Date'] < combined_data_non['Completion Date']
+# combined_data_non = combined_data_non[(combined_data_non['Fault Date'] > combined_data_non['before_window']) & (combined_data_non['Fault Date'] < combined_data_non['after_window'])]
 
-combined_data_non = combined_data_non[(combined_data_non['Fault Date'] > combined_data_non['Completion Date']) | (combined_data_non['Fault Date'] < combined_data_non['Received Date'])]
+# combined_data_non['Pre'] = combined_data_non['Fault Date'] < combined_data_non['Completion Date']
 
-combined_data_non['row'] = True
+# combined_data_non = combined_data_non[(combined_data_non['Fault Date'] > combined_data_non['Completion Date']) | (combined_data_non['Fault Date'] < combined_data_non['Received Date'])]
 
-non_msp_counts = combined_data_non[['Job Code', 'MSP', 'Pre', 'row']].groupby(['Job Code', 'MSP', 'Pre']).count().reset_index()
+# combined_data_non['row'] = True
 
-non_corrosion = non_msp_counts[non_msp_counts['MSP'].isin(msp_interest)].query('Pre').drop('Pre', axis = 1).pivot(index = 'Job Code', columns = 'MSP', values = 'row').fillna(0.0).reset_index()
+# non_msp_counts = combined_data_non[['Job Code', 'MSP', 'Pre', 'row']].groupby(['Job Code', 'MSP', 'Pre']).count().reset_index()
 
-non_corrosion['corrosion'] = False
+# non_corrosion = non_msp_counts[non_msp_counts['MSP'].isin(msp_interest)].query('Pre').drop('Pre', axis = 1).pivot(index = 'Job Code', columns = 'MSP', values = 'row').fillna(0.0).reset_index()
 
-non_corrosion.drop('Job Code', axis = 1, inplace = True)
+# non_corrosion['corrosion'] = False
 
-print('####################################################################################')
-non_corrosion.shape
+# non_corrosion.drop('Job Code', axis = 1, inplace = True)
 
-corrosion.shape
+# print('####################################################################################')
+# non_corrosion.shape
 
-#non_corrosion.append(corrosion).to_csv('predict_corrosive.csv', index = True)
+# corrosion.shape
+
+# non_corrosion.append(corrosion).to_csv('predict_corrosive.csv', index = True)
